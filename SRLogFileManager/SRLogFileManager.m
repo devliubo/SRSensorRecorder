@@ -439,24 +439,31 @@
         return NO;
     }
     
-    NSError *error = nil;
-    NSString *logFileString = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&error];
-    if (error != nil)
-    {
-        NSLog(@"Load Location Log File Error: %@", error);
-        return NO;
-    }
-    
-    [_locations removeAllObjects];
-    
-    NSArray<NSString *> *allLogStrings = [logFileString componentsSeparatedByString:@"\n"];
-    for (NSString *aLog in allLogStrings)
-    {
-        if (aLog != nil && aLog.length > 0)
+    @try {
+        NSError *error = nil;
+        NSString *logFileString = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&error];
+        if (error != nil)
         {
-            CLLocation *aLocation = [SRLogFileManagerUtility CLLocationFromLogString:aLog];
-            [_locations addObject:aLocation];
+            NSLog(@"Load Location Log File Error: %@", error);
+            return NO;
         }
+        
+        [_locations removeAllObjects];
+        
+        NSArray<NSString *> *allLogStrings = [logFileString componentsSeparatedByString:@"\n"];
+        for (NSString *aLog in allLogStrings)
+        {
+            if (aLog != nil && aLog.length > 0)
+            {
+                CLLocation *aLocation = [SRLogFileManagerUtility CLLocationFromLogString:aLog];
+                [_locations addObject:aLocation];
+            }
+        }
+    } @catch (NSException *exception) {
+        NSLog(@"File formate not matchied.");
+        return NO;
+    } @finally {
+        
     }
     
     return YES;
